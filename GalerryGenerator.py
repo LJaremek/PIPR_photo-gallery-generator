@@ -125,6 +125,7 @@ class GalerryGenerator:
         except cv2.error:
             return True # corect topic
         return not difference
+    #test
 
 
     def cut_canvas(self):
