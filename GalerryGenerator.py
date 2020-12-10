@@ -1,4 +1,6 @@
 from SimpleCanvas import Canvas
+from Colors import Colors
+from Photo import Photo
 from errors import *
 """-----------------------------"""
 from urllib.request import urlopen
@@ -18,11 +20,17 @@ class GalerryGenerator:
         self._approved_photos = []
 
 
-    def _create_canvas(self):
+    def _create_canvas(self, background):
         """
         Creating a empty canvas.
         """
-        self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
+        if background in Colors.keys():
+            self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
+            self._canvas[:,:] = Colors[background]
+            return None
+        background = self._download_photo(background)
+        self._canvas = self._resize_photo(background, self._width, self._height)
+        #self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
 
 
     def show_canvas(self):
@@ -93,6 +101,9 @@ class GalerryGenerator:
 
 
     def _resize_shapes(self, photo, divider = 3):
+        """
+        Resizing shapes of photo.
+        """
         width, height = photo.shape[1]//3, photo.shape[0]//3
         return width, height
 
@@ -125,20 +136,22 @@ class GalerryGenerator:
         except cv2.error:
             return True # corect topic
         return not difference
-    #test
 
 
     def cut_canvas(self):
+        """
+        Cutting the canvas to minimal possibility size.
+        """
         new_width, new_height = self._numeric_canvas.cut_canvas()
         crop_canvas = self._canvas[0: new_height, 0: new_width]
         self._canvas = crop_canvas
 
 
-    def generate_gallery(self, topic, number_of_photos = 9, background = "black"):
+    def generate_gallery(self, topic, number_of_photos = 9, background = "Black"):
         """
         Generating new gallery with photos about given topic.
         """
-        self._create_canvas()
+        self._create_canvas(background)
         
         self._find_photos(topic, number_of_photos)
 
@@ -150,7 +163,7 @@ class GalerryGenerator:
 if __name__ == "__main__":
     gen = GalerryGenerator()
     
-    gen.generate_gallery(topic = "plane", number_of_photos = 10, background = "sky")
+    gen.generate_gallery(topic = "plane", number_of_photos = 10)
     
     gen.cut_canvas()
     
