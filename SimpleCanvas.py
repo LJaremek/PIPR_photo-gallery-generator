@@ -63,7 +63,7 @@ class Canvas:
         return True
 
 
-    def is_free_place(self, min_width = 360, min_height = 202):
+    def is_free_space(self, min_width = 360, min_height = 202):
         """
         Checking if there is a free space of the given dimensions.
         """

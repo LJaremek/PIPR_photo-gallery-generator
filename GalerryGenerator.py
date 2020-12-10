@@ -88,7 +88,7 @@ class GalerryGenerator:
         while not difference:
             photo = self._download_photo(topic)
             difference = self._compare_photo(photo)
-        self._photos.append(photo)
+        return photo
 
 
     def _find_photos(self, topic, count = 5):
@@ -152,23 +152,24 @@ class GalerryGenerator:
         Generating new gallery with photos about given topic.
         """
         self._create_canvas(background)
-        
-        self._find_photos(topic, number_of_photos)
+        while len(self._photos) < number_of_photos:
+            if not self._numeric_canvas.is_free_space():
+                break        
+            new_photo = self._find_photo(topic)
+            self._add_photo(new_photo)
+            sleep(1.5)
+            self._photos.append(new_photo)
 
-        for photo in self._photos:
-            self._add_photo(photo)
         
 # min photo shape: 1080, 607 -> 360, 202 - > 8x5
 
 if __name__ == "__main__":
     gen = GalerryGenerator()
     
-    gen.generate_gallery(topic = "plane", number_of_photos = 10)
+    gen.generate_gallery(topic = "gun")
     
     gen.cut_canvas()
     
     gen.show_canvas()
     
     gen._numeric_canvas.show()
-    print(len(gen._approved_photos),"/",len(gen._photos))
-    print(gen._numeric_canvas.cut_canvas())
