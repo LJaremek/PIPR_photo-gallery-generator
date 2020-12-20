@@ -40,6 +40,13 @@ class GalerryGenerator:
         cv2.imshow("canvas", self._canvas)
 
 
+    def canvas(self):
+        """
+        Returning canvas as cv2 image.
+        """
+        return self._canvas
+
+
     def _check_difference(self, photo_1, photo_2):
         """
         Checking if is some difference between two photos.
@@ -109,7 +116,17 @@ class GalerryGenerator:
 
 
     def _resize_photo(self, photo, new_width, new_height):
+        """
+        Returning resized photo.
+        """
         return cv2.resize(photo, (new_width, new_height))
+
+
+    def resized_canvas(self, new_width, new_height):
+        """
+        Returning resized canvas
+        """
+        return cv2.resize(self._canvas, (new_width, new_height))
 
 
     def _add_photo(self, photo):
@@ -144,6 +161,7 @@ class GalerryGenerator:
         """
         new_width, new_height = self._numeric_canvas.cut_canvas()
         crop_canvas = self._canvas[0: new_height, 0: new_width]
+        crop_canvas = cv2.cvtColor(crop_canvas, cv2.COLOR_BGR2RGB)
         self._canvas = crop_canvas
 
 
@@ -164,11 +182,13 @@ class GalerryGenerator:
 # min photo shape: 1080, 607 -> 360, 202 - > 8x5
 
 if __name__ == "__main__":
-    gen = GalerryGenerator()
-    
-    gen.generate_gallery(topic = "gun")
-    
+    gen = GalerryGenerator(1000, 1500)
+
+    gen.generate_gallery(topic = "turkey", background = "Black")
     gen.cut_canvas()
+    gallery = gen.canvas()
+    #cv2.imwrite("new_gallery.jpg", gallery)
+
     
     gen.show_canvas()
     
