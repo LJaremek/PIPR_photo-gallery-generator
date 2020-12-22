@@ -184,7 +184,7 @@ class GalerryGenerator:
 if __name__ == "__main__":
     gen = GalerryGenerator(1000, 1500)
 
-    gen.generate_gallery(topic = "turkey", background = "Black")
+    gen.generate_gallery(topic = "flower", background = "green")
     gen.cut_canvas()
     gallery = gen.canvas()
     #cv2.imwrite("new_gallery.jpg", gallery)
