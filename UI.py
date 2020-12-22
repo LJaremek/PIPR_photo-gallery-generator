@@ -5,23 +5,31 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, # Main App
                              QLabel, QLineEdit, QPushButton, # Widgets
                              QWidget) # Widget
 from PyQt5.QtGui import QPainter, QPixmap, QImage # Canvas items
+import tkinter
 import cv2
 
 
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.showMaximized()
+        self.showMaximized() # animacja, pasek menu (help, save, format pliku)
+        self._set_up_sizes() # generate większy, reset
+
         self._create_options_layout()
-        
         self._create_canvas_layout()
         self._create_main_layout()
         self.create_empty_canvas()
-        self._screen_width = self.size().width()
-        self._sceen_height = self.size().height()
-        print(self._screen_width, self._sceen_height)
-        
+
         self.setCentralWidget(self._widget_main)
+
+
+    def _set_up_sizes(self):
+        tk = tkinter.Tk()
+        self.screen_width  = tk.winfo_screenwidth() # generuj losowo
+        self.screen_height = tk.winfo_screenheight() # różne pakiety rozmiarów
+        tk.destroy()
+        self.canvas_width = int(self.screen_height*(2/3))
+        self.canvas_height = int(self.screen_height*(8/9))
 
 
     def _create_options_layout(self):
@@ -69,10 +77,10 @@ class Window(QMainWindow):
         Creating right panel - panel with canvas with photos.
         """
         self._widget_canvas = QLabel()
-        self._canvas = QPixmap(600, 800)#QPixmap.fromImage(self.background)
+        self._canvas = QPixmap(self.canvas_width, self.canvas_height)#QPixmap.fromImage(self.background)
         self._widget_canvas.setPixmap(self._canvas)
 
-
+# click, pysimplegui
     def _create_main_layout(self):
         """
         Creating main layout with left and right panels.
@@ -88,7 +96,7 @@ class Window(QMainWindow):
         """
         Creating empty canvas.
         """
-        self._canvas = QPixmap(600, 800)#self._canvas = QPixmap.fromImage(self.background)
+        self._canvas = QPixmap(self.canvas_width, self.canvas_height)#self._canvas = QPixmap.fromImage(self.background)
         self._widget_canvas.setPixmap(self._canvas)
 
 
@@ -105,8 +113,15 @@ class Window(QMainWindow):
         self.painter.end()
 
         self._widget_canvas.setPixmap(QPixmap.fromImage(self._canvas))
-        
-        
+
+
+    def save_gallery(self, name = None):
+        """
+        Saving the gallery.
+        """
+        if name == None:
+            name = f"{self.get_topic()}_gallery.png"
+        cv2.imwrite(name, self.generator.canvas)
 
 
     def get_topic(self):
@@ -151,16 +166,14 @@ class Window(QMainWindow):
         self.generator.cut_canvas()
         cv2.imwrite("new_gallery1.jpg", self.generator.canvas())
         gallery = self.generator.canvas()
-        height, width = gallery.shape[0], gallery.shape[1]
-        print(1)
+        small_gallery = self.generator.resized_canvas(self.canvas_width, self.canvas_height)
         
-        #cv2.imwrite("new_gallery.jpg", gallery)
+        
+        height, width = small_gallery.shape[0], small_gallery.shape[1]
 
-        self._canvas = QImage(gallery.data, width, height, QImage.Format_RGB888)
-        print("type:", self._canvas)
-        print(2)
+        self._canvas = QImage(small_gallery.data, width, height, QImage.Format_RGB888)
+
         self._widget_canvas.setPixmap(QPixmap.fromImage(self._canvas)) # zmienić wymiar?
-        print(3)
          
 
     

@@ -28,9 +28,8 @@ class GalerryGenerator:
             self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
             self._canvas[:,:] = Colors[background]
             return None
-        background = self._download_photo(background)
+        background, response_code = self._download_photo(background)
         self._canvas = self._resize_photo(background, self._width, self._height)
-        #self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
 
 
     def show_canvas(self):
@@ -82,9 +81,10 @@ class GalerryGenerator:
         Downloading  photo on the topic.
         """
         response = urlopen(self._main_page+topic)
+        code = response.status
         image = np.asarray(bytearray(response.read()), dtype = "uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        return image
+        return image, code
 
 
     def _find_photo(self, topic):
@@ -93,7 +93,7 @@ class GalerryGenerator:
         """
         difference = False
         while not difference:
-            photo = self._download_photo(topic)
+            photo, response_code = self._download_photo(topic)
             difference = self._compare_photo(photo)
         return photo
 
@@ -146,7 +146,8 @@ class GalerryGenerator:
 
 
     def _check_topic(self, topic):
-        random_photo = self._download_photo(topic) # sprawdzić odpowiedź servera
+        random_photo, response_code = self._download_photo(topic) # sprawdzić odpowiedź servera
+        
         error_photo = cv2.imread("source-404.jpg")
         try:
             difference = self._check_difference(random_photo, error_photo)
@@ -179,7 +180,6 @@ class GalerryGenerator:
             self._photos.append(new_photo)
 
         
-# min photo shape: 1080, 607 -> 360, 202 - > 8x5
 
 if __name__ == "__main__":
     gen = GalerryGenerator(1000, 1500)
@@ -188,7 +188,6 @@ if __name__ == "__main__":
     gen.cut_canvas()
     gallery = gen.canvas()
     #cv2.imwrite("new_gallery.jpg", gallery)
-
     
     gen.show_canvas()
     
