@@ -2,8 +2,10 @@ from SimpleCanvas import Canvas
 from Colors import Colors
 from Photo import Photo
 from errors import *
+from Types import *
 """-----------------------------"""
 from urllib.request import urlopen
+from bs4 import BeautifulSoup
 from random import randint
 from time import sleep
 import numpy as np
@@ -20,7 +22,7 @@ class GalerryGenerator:
         self._approved_photos = []
 
 
-    def _create_canvas(self, background):
+    def _create_canvas(self, background: str):
         """
         Creating a empty canvas.
         """
@@ -46,9 +48,16 @@ class GalerryGenerator:
         return self._canvas
 
 
-    def _check_difference(self, photo_1, photo_2):
+    def _check_difference(self, photo_1: NUMPY_ndarray, photo_2: NUMPY_ndarray):
+        print(type(photo_1), type(photo_2))
         """
         Checking if is some difference between two photos.
+        in:
+        photo_1: NUMPY_ndarray
+        photo_2: NUMPY_ndarray
+        out:
+        True if there are are a difference
+        False if there are not a difference
         """
         difference = cv2.subtract(photo_1, photo_2)
         b, g, r = cv2.split(difference)
@@ -57,7 +66,7 @@ class GalerryGenerator:
         return False
 
 
-    def _compare_photo(self, the_photo):
+    def _compare_photo(self, the_photo: NUMPY_ndarray):
         """
         Checking if the photo is not in the chosen photos.
         If it is in the photos:
@@ -66,17 +75,17 @@ class GalerryGenerator:
             return False
         """
         for photo in self._photos:
-            if photo.shape != the_photo.shape:
+            if photo.image().shape != the_photo.shape:
                 continue # another shapes => not the same
             
-            difference = self._check_difference(photo, the_photo)
+            difference = self._check_difference(photo.image(), the_photo)
             if difference:
                 return False
 
         return True # there are differences
 
 
-    def _download_photo(self, topic):
+    def _download_photo(self, topic: str):
         """
         Downloading  photo on the topic.
         """
@@ -87,18 +96,21 @@ class GalerryGenerator:
         return image, code
 
 
-    def _find_photo(self, topic):
+    def _find_photo(self, topic: str):
         """
         Finding a new photo which is not in the chosen photos.
         """
         difference = False
+        number_of_loop = 0
         while not difference:
             photo, response_code = self._download_photo(topic)
             difference = self._compare_photo(photo)
-        return photo
+            if number_of_loop >= self._photos_limit:
+                break
+        return Photo(photo, None, None, photo.shape[1], photo.shape[0], None)
 
 
-    def _find_photos(self, topic, count = 5):
+    def _find_photos(self, topic: str, count = 5):
         """
         Finding different photos about the topic.
         """
@@ -107,29 +119,31 @@ class GalerryGenerator:
             sleep(2)
 
 
-    def _resize_shapes(self, photo, divider = 3):
+    def _resize_shapes(self, photo: PHOTO_photo, divider = 3):
         """
         Resizing shapes of photo.
         """
-        width, height = photo.shape[1]//3, photo.shape[0]//3
+        width, height = photo.width()//3, photo.height()//3
         return width, height
 
 
-    def _resize_photo(self, photo, new_width, new_height):
+    def _resize_photo(self, photo: PHOTO_photo, new_width: int, new_height: int):
         """
         Returning resized photo.
         """
-        return cv2.resize(photo, (new_width, new_height))
+        resized_image = cv2.resize(photo.image(), (new_width, new_height))
+        new_photo = Photo(resized_image, photo.x(), photo.y(), new_width, new_height, photo.name())
+        return new_photo
 
 
-    def resized_canvas(self, new_width, new_height):
+    def resized_canvas(self, new_width: int, new_heigh: int):
         """
         Returning resized canvas
         """
         return cv2.resize(self._canvas, (new_width, new_height))
 
 
-    def _add_photo(self, photo):
+    def _add_photo(self, photo: PHOTO_photo):
         """
         Adding the photo to the canvas if there are space for it.
         """
@@ -141,19 +155,35 @@ class GalerryGenerator:
         
         x, y = cords
         resized_photo = self._resize_photo(photo, width, height)
-        self._canvas[y:y+height, x:x+width] = resized_photo
+        self._canvas[y:y+height, x:x+width] = resized_photo.image()
         self._approved_photos.append(resized_photo)
 
 
-    def _check_topic(self, topic):
-        random_photo, response_code = self._download_photo(topic) # sprawdzić odpowiedź servera
-        
-        error_photo = cv2.imread("source-404.jpg")
+    def check_topic(self, topic: str):
+        """
+        Checking if the topic is correctly.
+        If it is:
+            return True
+        else:
+            return False
+        """
+        url = f"https://unsplash.com/s/photos/{topic}"
+        request = urlopen(url)
+        soup = BeautifulSoup(request.read(), "html.parser")
+        response = soup.findAll("span", {"class": "_3ruL8"})
         try:
-            difference = self._check_difference(random_photo, error_photo)
-        except cv2.error:
-            return True # corect topic
-        return not difference
+            count = int(response[0].get_text())
+            return (count > 10, count)
+        except ValueError:
+            return True, 100
+##        random_photo, response_code = self._download_photo(topic) # sprawdzić odpowiedź servera
+##        
+##        error_photo = cv2.imread("source-404.jpg")
+##        try:
+##            difference = self._check_difference(random_photo, error_photo)
+##        except cv2.error:
+##            return True # corect topic
+##        return not difference
 
 
     def cut_canvas(self):
@@ -166,25 +196,31 @@ class GalerryGenerator:
         self._canvas = crop_canvas
 
 
-    def generate_gallery(self, topic, number_of_photos = 9, background = "Black"):
+    def generate_gallery(self, topic: str, number_of_photos = 9, background = "Black"):
         """
         Generating new gallery with photos about given topic.
         """
+        topic_bool, self._photos_limit = self.check_topic(topic)
+        number_of_loop = 0
         self._create_canvas(background)
         while len(self._photos) < number_of_photos:
             if not self._numeric_canvas.is_free_space():
                 break        
             new_photo = self._find_photo(topic)
             self._add_photo(new_photo)
-            sleep(1.5)
+            #sleep(1.5)
             self._photos.append(new_photo)
+            number_of_loop += 1
+            if number_of_loop >= self._photos_limit:
+                break
+
 
         
 
 if __name__ == "__main__":
-    gen = GalerryGenerator(1000, 1500)
+    gen = GalerryGenerator(1000, 800)
 
-    gen.generate_gallery(topic = "flower", background = "green")
+    gen.generate_gallery(topic = "flowers", background = "Black")
     gen.cut_canvas()
     gallery = gen.canvas()
     #cv2.imwrite("new_gallery.jpg", gallery)

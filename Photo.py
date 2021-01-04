@@ -1,10 +1,18 @@
 class Photo:
-    def __init__(self, x, y, width, height, name):
+    def __init__(self, image, x, y, width, height, name):
+        self._image = image
         self._x = x
         self._y = x
         self._width = width
-        self_height = height
+        self._height = height
         self._name = name
+
+
+    def image(self):
+        """
+        Return image
+        """
+        return self._image
 
 
     def x(self):
@@ -40,3 +48,10 @@ class Photo:
         Return width
         """
         return self._width
+
+
+    def name(self):
+        """
+        Return name
+        """
+        return self._name
