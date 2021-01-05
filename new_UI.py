@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
                          numpy_image.shape[1]*3, QImage.Format_RGB888)
         
         item = QPixmap(q_image)
-        item = self.resize_item_to(item, width = 200)
+        #item = self.resize_item_to(item, width = 200)
         self.set_qpixmap_on_scene(item, x, y)
         
 
@@ -229,12 +229,13 @@ class MainWindow(QMainWindow):
 window = MainWindow()
 
 gen = GalerryGenerator()
-gen._photos_limit = 5
-back = gen._find_photo("coal")
-bird1 = gen._find_photo("bird").image()
+gen.generate_gallery(topic = "stone", background = "Green")
+photos = gen.photos()
+background = gen.background()
 
-window.set_background(back)
-window.set_numpy_image_on_scene(bird1, 100, 100)
+window.set_background(background)
+for photo in photos:
+    window.set_numpy_image_on_scene(photo.image(), photo.x(), photo.y())
 window.show()
 
 app.exec_()

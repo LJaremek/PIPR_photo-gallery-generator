@@ -7,6 +7,7 @@ from Types import *
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from random import randint
+from copy import deepcopy
 from time import sleep
 import numpy as np
 import cv2
@@ -20,6 +21,7 @@ class GalerryGenerator:
         self._main_page = "https://source.unsplash.com/featured/?"
         self._photos = []
         self._approved_photos = []
+        self._photos_limit = 5
 
 
     def _create_canvas(self, background: str):
@@ -29,10 +31,10 @@ class GalerryGenerator:
         if background in Colors.keys():
             self._canvas = np.zeros((self._height, self._width, 3), np.uint8)
             self._canvas[:,:] = Colors[background]
-            return None
-        background, response_code = self._download_photo(background)
-        self._canvas = self._resize_photo(background, self._width, self._height)
-
+        else:
+            background, response_code = self._download_photo(background)
+            self._canvas = self._resize_photo(background, self._width, self._height)
+        self._background = Photo(deepcopy(self._canvas), 0, 0, self._width, self._height, "background")
 
     def show_canvas(self):
         """
@@ -49,7 +51,6 @@ class GalerryGenerator:
 
 
     def _check_difference(self, photo_1: NUMPY_ndarray, photo_2: NUMPY_ndarray):
-        print(type(photo_1), type(photo_2))
         """
         Checking if is some difference between two photos.
         in:
@@ -89,7 +90,7 @@ class GalerryGenerator:
         """
         Downloading  photo on the topic.
         """
-        response = urlopen(self._main_page+topic)
+        response = urlopen(self._main_page+topic) # łapanie HTTP Error 503 ?
         code = response.status
         image = np.asarray(bytearray(response.read()), dtype = "uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -107,16 +108,8 @@ class GalerryGenerator:
             difference = self._compare_photo(photo)
             if number_of_loop >= self._photos_limit:
                 break
-        return Photo(photo, None, None, photo.shape[1], photo.shape[0], None)
-
-
-    def _find_photos(self, topic: str, count = 5):
-        """
-        Finding different photos about the topic.
-        """
-        for photo_nr in range(count):
-            self._find_photo(topic)
-            sleep(2)
+            number_of_loop += 1
+        return Photo(photo, None, None, photo.shape[1], photo.shape[0], "photo")
 
 
     def _resize_shapes(self, photo: PHOTO_photo, divider = 3):
@@ -133,6 +126,7 @@ class GalerryGenerator:
         """
         resized_image = cv2.resize(photo.image(), (new_width, new_height))
         new_photo = Photo(resized_image, photo.x(), photo.y(), new_width, new_height, photo.name())
+
         return new_photo
 
 
@@ -154,9 +148,25 @@ class GalerryGenerator:
             return None
         
         x, y = cords
+        photo.setx(x)
+        photo.sety(y)
         resized_photo = self._resize_photo(photo, width, height)
         self._canvas[y:y+height, x:x+width] = resized_photo.image()
         self._approved_photos.append(resized_photo)
+
+
+    def background(self):
+        """
+        Return background as Photo class.
+        """
+        return self._background
+
+
+    def photos(self):
+        """
+        Return list with photos
+        """
+        return self._approved_photos
 
 
     def check_topic(self, topic: str):
@@ -172,10 +182,10 @@ class GalerryGenerator:
         soup = BeautifulSoup(request.read(), "html.parser")
         response = soup.findAll("span", {"class": "_3ruL8"})
         try:
-            count = int(response[0].get_text())
+            count = int(response[0].get_text()) # count is a int number (<1000)
             return (count > 10, count)
-        except ValueError:
-            return True, 100
+        except ValueError: # count is bigger than 1000 (1.0k)
+            return True, 300
 ##        random_photo, response_code = self._download_photo(topic) # sprawdzić odpowiedź servera
 ##        
 ##        error_photo = cv2.imread("source-404.jpg")
@@ -215,6 +225,13 @@ class GalerryGenerator:
                 break
 
 
+    def save_gallery(self, file_name = "my_gallery.jpg"):
+        """
+        Saving the gallery as file_name
+        """
+        cv2.imwrite(file_name, self.canvas())
+
+
         
 
 if __name__ == "__main__":
@@ -223,7 +240,6 @@ if __name__ == "__main__":
     gen.generate_gallery(topic = "flowers", background = "Black")
     gen.cut_canvas()
     gallery = gen.canvas()
-    #cv2.imwrite("new_gallery.jpg", gallery)
     
     gen.show_canvas()
     
