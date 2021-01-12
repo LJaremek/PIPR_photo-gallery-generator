@@ -1,5 +1,5 @@
 class Photo:
-    def __init__(self, image, x, y, width, height, name):
+    def __init__(self, image, x=None, y=None, width=None, height=None, name=None):
         self._image = image
         self._x = x
         self._y = y

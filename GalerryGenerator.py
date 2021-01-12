@@ -2,9 +2,9 @@ from SimpleCanvas import Canvas
 from Colors import Colors
 from Photo import Photo
 from errors import *
-from Types import *
 """-----------------------------"""
 from urllib.request import urlopen
+from urllib.error import URLError
 from bs4 import BeautifulSoup
 from random import randint
 from copy import deepcopy
@@ -14,7 +14,7 @@ import cv2
 
 
 class GalerryGenerator:
-    def __init__(self, width = 1500, height = 1000):
+    def __init__(self, width: int = 1500, height: int = 1000):
         self._width = width
         self._height = height
         self._numeric_canvas = Canvas(width, height)
@@ -33,24 +33,24 @@ class GalerryGenerator:
             self._canvas[:,:] = Colors[background]
         else:
             background, response_code = self._download_photo(background)
-            self._canvas = self._resize_photo(background, self._width, self._height)
+            self._canvas = self._resize_photo(Photo(background), self._width, self._height).image()
         self._background = Photo(deepcopy(self._canvas), 0, 0, self._width, self._height, "background")
 
     def show_canvas(self):
         """
         Showing the canvas with photos.
         """
-        cv2.imshow("canvas", self._canvas)
+        cv2.imshow("gallery", self._canvas)
 
 
     def canvas(self):
         """
-        Returning canvas as cv2 image.
+        Returning canvas as ndarray.
         """
         return self._canvas
 
 
-    def _check_difference(self, photo_1: NUMPY_ndarray, photo_2: NUMPY_ndarray):
+    def _check_difference(self, photo_1: np.ndarray, photo_2: np.ndarray):
         """
         Checking if is some difference between two photos.
         in:
@@ -67,7 +67,7 @@ class GalerryGenerator:
         return False
 
 
-    def _compare_photo(self, the_photo: NUMPY_ndarray):
+    def _compare_photo(self, the_photo: np.ndarray):
         """
         Checking if the photo is not in the chosen photos.
         If it is in the photos:
@@ -112,7 +112,7 @@ class GalerryGenerator:
         return Photo(photo, None, None, photo.shape[1], photo.shape[0], "photo")
 
 
-    def _resize_shapes(self, photo: PHOTO_photo, divider = 3):
+    def _resize_shapes(self, photo: Photo, divider = 3):
         """
         Resizing shapes of photo.
         """
@@ -120,13 +120,12 @@ class GalerryGenerator:
         return width, height
 
 
-    def _resize_photo(self, photo: PHOTO_photo, new_width: int, new_height: int):
+    def _resize_photo(self, photo: Photo, new_width: int, new_height: int):
         """
         Returning resized photo.
         """
         resized_image = cv2.resize(photo.image(), (new_width, new_height))
         new_photo = Photo(resized_image, photo.x(), photo.y(), new_width, new_height, photo.name())
-
         return new_photo
 
 
@@ -137,7 +136,7 @@ class GalerryGenerator:
         return cv2.resize(self._canvas, (new_width, new_height))
 
 
-    def _add_photo(self, photo: PHOTO_photo):
+    def _add_photo(self, photo: Photo):
         """
         Adding the photo to the canvas if there are space for it.
         """
@@ -178,22 +177,19 @@ class GalerryGenerator:
             return False
         """
         url = f"https://unsplash.com/s/photos/{topic}"
-        request = urlopen(url)
+        try:
+            request = urlopen(url)
+        except URLError:
+            assert UnsplashConnectError
+            return False, -1
         soup = BeautifulSoup(request.read(), "html.parser")
         response = soup.findAll("span", {"class": "_3ruL8"})
         try:
-            count = int(response[0].get_text()) # count is a int number (<1000)
+            count = response[0].get_text()
+            count = int(count) # count is a int number (<1000)
             return (count > 10, count)
         except ValueError: # count is bigger than 1000 (1.0k)
             return True, 300
-##        random_photo, response_code = self._download_photo(topic) # sprawdzić odpowiedź servera
-##        
-##        error_photo = cv2.imread("source-404.jpg")
-##        try:
-##            difference = self._check_difference(random_photo, error_photo)
-##        except cv2.error:
-##            return True # corect topic
-##        return not difference
 
 
     def cut_canvas(self):
@@ -206,26 +202,28 @@ class GalerryGenerator:
         self._canvas = crop_canvas
 
 
-    def generate_gallery(self, topic: str, number_of_photos = 9, background = "Black"):
+    def generate_gallery(self, topic: str, number_of_photos: int = 9, background: str = "Black"):
         """
         Generating new gallery with photos about given topic.
         """
         topic_bool, self._photos_limit = self.check_topic(topic)
         number_of_loop = 0
         self._create_canvas(background)
-        while len(self._photos) < number_of_photos:
+        while topic_bool and (len(self._photos) < number_of_photos):
             if not self._numeric_canvas.is_free_space():
-                break        
+                break
+            
             new_photo = self._find_photo(topic)
             self._add_photo(new_photo)
             #sleep(1.5)
             self._photos.append(new_photo)
+
             number_of_loop += 1
             if number_of_loop >= self._photos_limit:
                 break
 
 
-    def save_gallery(self, file_name = "my_gallery.jpg"):
+    def save_gallery(self, file_name: str = "my_gallery.jpg"):
         """
         Saving the gallery as file_name
         """
@@ -237,9 +235,10 @@ class GalerryGenerator:
 if __name__ == "__main__":
     gen = GalerryGenerator(1000, 800)
 
-    gen.generate_gallery(topic = "flowers", background = "Black")
-    gen.cut_canvas()
+    gen.generate_gallery(topic = "team", background = "Black")
+    # gen.cut_canvas()
     gallery = gen.canvas()
+    print(type(gallery))
     
     gen.show_canvas()
     
