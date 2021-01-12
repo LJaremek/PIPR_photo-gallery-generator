@@ -100,6 +100,12 @@ class MainWindow(QMainWindow):
         
 
     def set_numpy_image_on_scene(self, numpy_image, x, y):
+        import cv2
+
+        print(type(numpy_image))
+        numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR, numpy_image)
+        print(type(numpy_image))
+        
         q_image = QImage(numpy_image.data, numpy_image.shape[1], numpy_image.shape[0],
                          numpy_image.shape[1]*numpy_image.shape[2], QImage.Format_RGB888)
         
