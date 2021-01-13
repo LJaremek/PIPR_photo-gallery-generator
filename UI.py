@@ -5,14 +5,14 @@ from errors import *
 """-----------------------------"""
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QFormLayout, QHBoxLayout
-from PyQt5.QtWidgets import QLabel, QLineEdit
+from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QAction
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from PyQt5.QtWidgets import QGraphicsPixmapItem
+from PyQt5.QtWidgets import QInputDialog
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QSize
 
-from random import choice
 import sys
 
 
@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
         self.save = QAction("&Save", self)
         self.save.setShortcut("Ctrl+S")
         self.save.setStatusTip("Save generated gallery")
+        self.save.triggered.connect(self.save_gallery)
         self.save.setEnabled(False)
         self.gallery.addAction(self.save)
 
@@ -61,21 +62,25 @@ class MainWindow(QMainWindow):
         ex.exec()
         result = ex.getInputs()
         if result != None:
-            print(1)
             self._gen = GalerryGenerator(result[2], result[3])
-            print(2)
             self._gen.generate_gallery(topic = result[0], background = result[1])
-            print(3)
             photos = self._gen.photos()
-            print(photos)
             background = self._gen.background()
-            print(background)
             self.set_background(background)
             for photo in photos:
                 window.set_numpy_image_on_scene(photo.image(), photo.x(), photo.y())
             self.save.setEnabled(True)
             self.clear.setEnabled(True)
 
+
+    def save_gallery(self):
+        from PyQt5.QtWidgets import QInputDialog
+        text, okPressed = QInputDialog.getText(self, "Input file name","File name:", QLineEdit.Normal, "my_gallery.png",)
+        if okPressed and text != '':
+            if len(text.strip().split(".")) == 2:
+                self._gen.save_gallery(text.strip())
+            else:
+                self._gen.save_gallery(text.strip()+".jpg")
 
     def set_qpixmap_on_scene(self, qpixmap, x, y):
         item = QGraphicsPixmapItem(qpixmap)
@@ -102,9 +107,7 @@ class MainWindow(QMainWindow):
     def set_numpy_image_on_scene(self, numpy_image, x, y):
         import cv2
 
-        print(type(numpy_image))
         numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR, numpy_image)
-        print(type(numpy_image))
         
         q_image = QImage(numpy_image.data, numpy_image.shape[1], numpy_image.shape[0],
                          numpy_image.shape[1]*numpy_image.shape[2], QImage.Format_RGB888)

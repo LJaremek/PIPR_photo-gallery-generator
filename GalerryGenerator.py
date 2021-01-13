@@ -90,7 +90,7 @@ class GalerryGenerator:
         """
         Downloading  photo on the topic.
         """
-        response = urlopen(self._main_page+topic) # łapanie HTTP Error 503 ?
+        response = urlopen(self._main_page+topic)
         code = response.status
         image = np.asarray(bytearray(response.read()), dtype = "uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
