@@ -17,6 +17,7 @@ class GalerryGenerator:
     def __init__(self, width: int = 1500, height: int = 1000):
         self._width = width
         self._height = height
+        self._canvas = np.zeros((height, width, 3), np.uint8)
         self._numeric_canvas = Canvas(width, height)
         self._main_page = "https://source.unsplash.com/featured/?"
         self._photos = []
@@ -48,6 +49,15 @@ class GalerryGenerator:
         Returning canvas as ndarray.
         """
         return self._canvas
+
+
+    def set_canvas(self, new_canvas: np.ndarray):
+        """
+        Setting new canvas.
+        """
+        print(self._canvas == new_canvas)
+        self._canvas = new_canvas
+        print(self._canvas == new_canvas)
 
 
     def _check_difference(self, photo_1: np.ndarray, photo_2: np.ndarray):
@@ -191,7 +201,7 @@ class GalerryGenerator:
         except ValueError: # count is bigger than 1000 (1.0k)
             return True, 300
 
-
+# sublime
     def cut_canvas(self):
         """
         Cutting the canvas to minimal possibility size.
@@ -206,7 +216,7 @@ class GalerryGenerator:
         """
         Generating new gallery with photos about given topic.
         """
-        topic_bool, self._photos_limit = self.check_topic(topic)
+        topic_bool, _ = self.check_topic(topic)
         number_of_loop = 0
         self._create_canvas(background)
         while topic_bool and (len(self._photos) < number_of_photos):
