@@ -55,9 +55,7 @@ class GalerryGenerator:
         """
         Setting new canvas.
         """
-        print(self._canvas == new_canvas)
         self._canvas = new_canvas
-        print(self._canvas == new_canvas)
 
 
     def _check_difference(self, photo_1: np.ndarray, photo_2: np.ndarray):

@@ -93,6 +93,12 @@ def create_effects_menu(self_):
     self_.old_cartoon.setEnabled(False)
     self_.effects.addAction(self_.old_cartoon)
 
+    self_.points = QAction("Points")
+    self_.points.setStatusTip("Show points of photo")
+    self_.points.triggered.connect(lambda: self_.put_effect("points"))
+    self_.points.setEnabled(False)
+    self_.effects.addAction(self_.points)
+
 
 def create_help_menu(self_):
     self_.help = self_.bar.addMenu("Help")

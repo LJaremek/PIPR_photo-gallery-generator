@@ -7,7 +7,9 @@ def blur(image):
 
 
 def canny(image):
-    return cv2.Canny(image, 100, 200)
+    image = cv2.Canny(image, 100, 200)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # corretion shapes
+    return image
 
 
 def bilateral(image):
@@ -18,7 +20,8 @@ def sepia(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray_1 = cv2.medianBlur(gray, 5)
     edges = cv2.adaptiveThreshold(gray_1, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 5)
-    return edges
+    image = cv2.cvtColor(edges, cv2.COLOR_RGB2BGR) # corretion shapes
+    return image
 
 
 def bitwise(image):
@@ -42,10 +45,17 @@ def old_cartoon(image):
     return cv2.bitwise_and(blurred, blurred, mask=sepia(image))
 
 
+def points(image):
+    image = sepia(image)
+    image = canny(image)
+    return sepia(image)
+
+
 effects_dict = {"blur": blur,
                 "canny": canny,
                 "bilateral": bilateral,
                 "sepia": sepia,
                 "bitwise": bitwise,
                 "pastel": pastel,
-                "old_cartoon": old_cartoon}
+                "old_cartoon": old_cartoon,
+                "points": points}

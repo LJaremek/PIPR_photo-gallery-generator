@@ -3,7 +3,7 @@ from UIClasses.PyQt5InputDialog import InputDialog
 from UIClasses.PyQt5Menus import (create_file_menu, create_gallery_menu,
                                   create_effects_menu, create_help_menu)
 from UIClasses.PyQt5message import message
-from efects import *
+from effects import *
 from errors import *
 """-----------------------------"""
 from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         self._gen = GalerryGenerator()
         self.scene = QGraphicsScene(self)
-        self.statusBar() # pasek narzędziowy
+        self.statusBar()
         
         self._config_bar()
         
@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
         effects_options.addAction(self.cartoon)
         effects_options.addAction(self.pastel)
         effects_options.addAction(self.old_cartoon)
+        effects_options.addAction(self.points)
 
 
     def set_effects(self, bool_value):
@@ -60,7 +61,8 @@ class MainWindow(QMainWindow):
         self.sepia.setEnabled(bool_value)
         self.cartoon.setEnabled(bool_value)
         self.pastel.setEnabled(bool_value)
-        self.old_cartoon.setEnabled(bool_value)
+        self.old_cartoon.setEnabled(False)
+        self.points.setEnabled(bool_value)
 
 
     def set_edit_options(self, bool_value):
@@ -74,6 +76,7 @@ class MainWindow(QMainWindow):
                                                   "Image files (*.jpg *.png)")
         if file_name:
             loaded_file = cv2.imread(file_name)
+            loaded_file = cv2.cvtColor(loaded_file, cv2.COLOR_RGB2BGR, loaded_file)
             self.set_new_canvas(loaded_file)
             self.set_effects(True)
             self.set_edit_options(True)
@@ -82,7 +85,6 @@ class MainWindow(QMainWindow):
     def put_effect(self, effect):
         selected_effect = effects_dict[effect]
         new_canvas = selected_effect( self._gen.canvas() )
-
         self.set_new_canvas(new_canvas)
         
 
@@ -94,13 +96,11 @@ class MainWindow(QMainWindow):
         if result != None:
             self._gen = GalerryGenerator(result[2], result[3])
             self._gen.generate_gallery(topic = result[0], background = result[1])
+            
             canvas = self._gen.canvas()
+            canvas = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR, canvas)
             self.set_numpy_image_on_scene(canvas, 0, 0)
-            #photos = self._gen.photos()
-            #background = self._gen.background()
-            #self.set_background(background)
-            #for photo in photos:
-            #    window.set_numpy_image_on_scene(photo.image(), photo.x(), photo.y())
+            
             self.set_edit_options(True)
             self.set_effects(True)
             self._gen.show_canvas()
@@ -110,13 +110,12 @@ class MainWindow(QMainWindow):
         self.scene.clear()
         self._gen.cut_canvas()
         canvas = self._gen.canvas()
+        canvas = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR, canvas)
         self.set_numpy_image_on_scene(canvas, 0, 0)
         self.cut.setEnabled(False)
 
 
     def set_new_canvas(self, new_canvas):
-        self._gen.set_canvas(new_canvas)
-        
         self.scene.clear()
         self.set_numpy_image_on_scene(new_canvas, 0, 0)
 
@@ -130,10 +129,15 @@ class MainWindow(QMainWindow):
     def save_gallery(self):
         text, okPressed = QInputDialog.getText(self, "Input file name","File name:", QLineEdit.Normal, "my_gallery.png",)
         if okPressed and text != '':
+            
+            canvas = self._gen.canvas()
+            numpy_image = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR, canvas)
+            cv2.imwrite(text.strip(), numpy_image)
+            
             if len(text.strip().split(".")) == 2:
-                self._gen.save_gallery(text.strip())
+                cv2.imwrite(text.strip(), numpy_image)
             else:
-                self._gen.save_gallery(text.strip()+".jpg")
+                cv2.imwrite(text.strip()+".jpg", numpy_image)
                 
 
     def set_qpixmap_on_scene(self, qpixmap, x, y):
@@ -159,15 +163,12 @@ class MainWindow(QMainWindow):
         
 
     def set_numpy_image_on_scene(self, numpy_image, x, y):
-
-        numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR, numpy_image)
-        
-        
+        self._gen.set_canvas(numpy_image)        
+        #print(numpy_image.shape)
         q_image = QImage(numpy_image.data, numpy_image.shape[1], numpy_image.shape[0],
                          numpy_image.shape[1]*numpy_image.shape[2], QImage.Format_RGB888)
         
         item = QPixmap(q_image)
-        #item = self.resize_item_to(item, width = 200)
         self.set_qpixmap_on_scene(item, x, y)
 
 
