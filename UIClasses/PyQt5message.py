@@ -6,4 +6,6 @@ def message(message, title, type_):
     msg.setText(message)
     if type_ == "Critical":
         msg.setIcon(QMessageBox.Critical)
+    elif type_ == "Ok":
+        msg.setIcon(QMessageBox.Information)
     msg.exec_()

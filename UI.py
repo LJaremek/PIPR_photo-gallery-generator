@@ -18,6 +18,7 @@ import cv2
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.setWindowTitle("GalleryGenerator")
         self._gen = GalerryGenerator()
         self.scene = QGraphicsScene(self)
         self.statusBar()
@@ -28,6 +29,10 @@ class MainWindow(QMainWindow):
         self.view.setGeometry(0, 0, 0, 0)
         
         self.setCentralWidget(self.view)
+
+        self.new_gallery = cv2.imread("new_gallery.png")
+        self.wait_for_gallery = cv2.imread("wait_for_gallery.png")
+        self.set_numpy_image_on_scene(self.new_gallery, 0, 0)
 
 
     def _config_bar(self):
@@ -92,9 +97,16 @@ class MainWindow(QMainWindow):
     def new_gallery(self):
         ex = InputDialog()
         ex.exec()
+        self.scene.clear()
+        self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0)
         result = ex.getInputs()
         if result != None:
+            self.scene.clear()
+            self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0)
+            message("Please wait!\nYour gallery is generating!", "Stand by", "Ok")
+            
             self._gen = GalerryGenerator(result[2], result[3])
+
             self._gen.generate_gallery(topic = result[0], background = result[1])
             
             canvas = self._gen.canvas()
@@ -103,7 +115,6 @@ class MainWindow(QMainWindow):
             
             self.set_edit_options(True)
             self.set_effects(True)
-            self._gen.show_canvas()
 
 
     def cut_gallery(self):
@@ -122,6 +133,7 @@ class MainWindow(QMainWindow):
 
     def clear_gallery(self):
         self.scene.clear()
+        self.set_numpy_image_on_scene(self.new_gallery, 0, 0)
         self.set_edit_options(False)
         self.set_effects(False)
 
@@ -163,11 +175,9 @@ class MainWindow(QMainWindow):
         
 
     def set_numpy_image_on_scene(self, numpy_image, x, y):
-        self._gen.set_canvas(numpy_image)        
-        #print(numpy_image.shape)
+        self._gen.set_canvas(numpy_image)
         q_image = QImage(numpy_image.data, numpy_image.shape[1], numpy_image.shape[0],
                          numpy_image.shape[1]*numpy_image.shape[2], QImage.Format_RGB888)
-        
         item = QPixmap(q_image)
         self.set_qpixmap_on_scene(item, x, y)
 
