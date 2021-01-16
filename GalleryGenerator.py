@@ -13,7 +13,7 @@ import numpy as np
 import cv2
 
 
-class GalerryGenerator:
+class GalleryGenerator:
     def __init__(self, width: int = 1500, height: int = 1000):
         self._width = width
         self._height = height
@@ -199,7 +199,7 @@ class GalerryGenerator:
         except ValueError: # count is bigger than 1000 (1.0k)
             return True, 300
 
-# sublime
+
     def cut_canvas(self):
         """
         Cutting the canvas to minimal possibility size.
@@ -223,7 +223,7 @@ class GalerryGenerator:
             
             new_photo = self._find_photo(topic)
             self._add_photo(new_photo)
-            #sleep(1.5)
+            
             self._photos.append(new_photo)
 
             number_of_loop += 1
