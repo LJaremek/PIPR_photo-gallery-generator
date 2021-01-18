@@ -83,10 +83,10 @@ class TopicGenerator:
         Searching for topics until there is one.
         """
         while len(self.topics) != 1000:
-            #try:
-            self.find_new_topic()
-        #    except:
-         #       print("some error")
+            try:
+                self.find_new_topic()
+            except:
+                print("[!] some error")
             
 
 
