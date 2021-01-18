@@ -1,6 +1,20 @@
 import numpy as np
 import cv2
 
+Colors = {"Black": (0,   0,   0),
+          "White": (255, 255, 255),
+          "Red":   (255, 0,   0),
+          "Green": (0,   255, 0),
+          "Blue":  (0,   0,   255),
+          "Olive": (50,  50,  0),
+          "Pink":  (255, 51,  153),
+          "Orange":(255, 102, 0),
+          "Purple":(153, 51,  255),
+          "Yellow":(255, 255, 0),
+          "Gray":  (128, 128, 128),
+          "Brown": (153, 102, 51),
+          "Turquoise":(64, 224, 208),
+          "Cyan":  (0, 255, 255)}
 
 def blur(image):
     return cv2.blur(image, (10, 10))

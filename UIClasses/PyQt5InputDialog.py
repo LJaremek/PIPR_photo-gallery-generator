@@ -34,7 +34,11 @@ class InputDialog(QDialog):
         self.accepted.connect(self.getInputs)
         buttonBox.rejected.connect(self.reject)
 
+
     def getInputs(self):
+        """
+        Getting the inputs from user
+        """
         topic = self.topic.text().strip()
         if topic == "":
             message("The topic can't be empty.", "Invalid topic", "Critical")

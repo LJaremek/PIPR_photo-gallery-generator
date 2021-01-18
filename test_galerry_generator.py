@@ -1,5 +1,5 @@
 from GalleryGenerator import GalleryGenerator
-
+from effects import Colors
 
 def test_init():
     gen = GalleryGenerator(height = 1500)
@@ -29,3 +29,13 @@ def test_photos():
     gen = GalleryGenerator()
     gen._approved_photos = ["photo1", "photo2", "photo3"]
     assert gen.photos() == ["photo1", "photo2", "photo3"]
+
+
+def test_color_1():
+    blue = Colors["Blue"]
+    assert blue == (0,0,255)
+
+
+def test_color_2():
+    turquoise = Colors["Turquoise"]
+    assert turquoise == 64, 224, 208)

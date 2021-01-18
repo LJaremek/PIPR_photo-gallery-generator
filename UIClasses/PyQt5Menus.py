@@ -3,6 +3,9 @@ import sys
 
 
 def create_file_menu(self_):
+    """
+    Creating file menu bar
+    """
     file = self_.bar.addMenu("File") # lepiej zwrócić niż nie
 
     self_.open = QAction("&Open", self_)
@@ -21,6 +24,9 @@ def create_file_menu(self_):
 
 
 def create_gallery_menu(self_):
+    """
+    Creating gallery menu bar
+    """
     self_.gallery = self_.bar.addMenu("Gallery")
     
     self_.new = QAction("&New", self_)
@@ -49,6 +55,9 @@ def create_gallery_menu(self_):
 
 
 def create_effects_menu(self_):
+    """
+    Creating effects menu bar
+    """
     self_.effects = self_.bar.addMenu("Effects")
     
     self_.blur = QAction("Blur", self_)
@@ -101,6 +110,9 @@ def create_effects_menu(self_):
 
 
 def create_help_menu(self_):
+    """
+    Creating help menu bar
+    """
     self_.help = self_.bar.addMenu("Help")
     
     self_.start = QAction("How to Start", self_)

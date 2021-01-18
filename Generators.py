@@ -1,15 +1,13 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-from threading import Thread
-
 
 class TopicGenerator:
-    def __init__(self, min_limit = 10):
+    def __init__(self, min_photos = 10):
         """
         Generator of great topic
         """
         self.main_url = "https://unsplash.com/s/photos/"
-        self.min_limit = min_limit
+        self.min_photos = min_photos
         self.read_topics()
 
 
@@ -24,14 +22,14 @@ class TopicGenerator:
             response = soup.findAll("span", {"class": "_3ruL8"})
             count = int(response[0].get_text())
         except ValueError: # count is for example: "1.1k"
-            return self.min_limit*2
+            return self.min_photos*2
         except:
             return -1
         return count
 
 
     def new_word(self, word):
-        return word not in self.topics
+        return word in self.topics
 
 
     def random_topic(self):
@@ -43,7 +41,6 @@ class TopicGenerator:
             request = urlopen("https://random-word-api.herokuapp.com/word?number=1")
             word = request.read().decode("utf-8")[2:-2]
             new_word = self.new_word(word)
-            print("1", word)
         return word
 
 
@@ -74,22 +71,25 @@ class TopicGenerator:
         """
         random_topic = self.random_topic()
         numbers_of_photos = self.numbers_of_photos(random_topic)
-        if numbers_of_photos >= self.min_limit:
-            self.topics.append(random_topic)
-            print(random_topic, numbers_of_photos)
+        if numbers_of_photos >= self.min_photos:
+            self.add_topic(random_topic)
+            print(f"[+] {random_topic} - {numbers_of_photos}")
         else:
-            print("WRONG", random_topic, numbers_of_photos)
+            print(f"[-] {random_topic} - {numbers_of_photos}")
 
 
     def good_topics(self):
         """
         Searching for topics until there is one.
         """
-        while len(self.topics) != 10:
+        while len(self.topics) != 1000:
+            #try:
             self.find_new_topic()
+        #    except:
+         #       print("some error")
             
 
 
 if __name__ == "__main__":
-    gen = TopicGenerator()
+    gen = TopicGenerator(200)
     gen.good_topics()

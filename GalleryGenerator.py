@@ -1,5 +1,5 @@
 from SimpleCanvas import Canvas
-from Colors import Colors
+from effects import Colors
 from Photo import Photo
 from errors import *
 """-----------------------------"""
@@ -36,6 +36,7 @@ class GalleryGenerator:
             background, response_code = self._download_photo(background)
             self._canvas = self._resize_photo(Photo(background), self._width, self._height).image()
         self._background = Photo(deepcopy(self._canvas), 0, 0, self._width, self._height, "background")
+
 
     def show_canvas(self):
         """
@@ -120,11 +121,11 @@ class GalleryGenerator:
         return Photo(photo, None, None, photo.shape[1], photo.shape[0], "photo")
 
 
-    def _resize_shapes(self, photo: Photo, divider = 3):
+    def _resize_shapes(self, photo: Photo, divider: int = 3):
         """
         Resizing shapes of photo.
         """
-        width, height = photo.width()//3, photo.height()//3
+        width, height = photo.width()//divider, photo.height()//divider
         return width, height
 
 
@@ -184,7 +185,7 @@ class GalleryGenerator:
         else:
             return False
         """
-        url = f"https://unsplash.com/s/photos/{topic}"
+        url = f"https://unsplash.com/s/photos/{topic.replace(' ', '-')}"
         try:
             request = urlopen(url)
         except URLError:
@@ -241,7 +242,7 @@ class GalleryGenerator:
         
 
 if __name__ == "__main__":
-    gen = GalerryGenerator(1000, 800)
+    gen = GalleryGenerator(1000, 800)
 
     gen.generate_gallery(topic = "team", background = "Black")
     # gen.cut_canvas()
