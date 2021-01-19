@@ -57,13 +57,6 @@ class Photo:
         return self._height
 
 
-    def width(self):
-        """
-        Return width
-        """
-        return self._width
-
-
     def name(self):
         """
         Return name

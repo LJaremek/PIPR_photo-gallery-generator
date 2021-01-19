@@ -137,7 +137,7 @@ class GalleryGenerator:
         return new_photo
 
 
-    def resized_canvas(self, new_width: int, new_heigh: int):
+    def resized_canvas(self, new_width: int, new_height: int):
         """
         Returning resized canvas
         """

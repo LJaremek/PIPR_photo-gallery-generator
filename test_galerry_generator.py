@@ -38,4 +38,4 @@ def test_color_1():
 
 def test_color_2():
     turquoise = Colors["Turquoise"]
-    assert turquoise == 64, 224, 208)
+    assert turquoise == (64, 224, 208)
