@@ -1,5 +1,7 @@
+from .PyQt5message import message
 from PyQt5.QtWidgets import QAction
 import sys
+import os
 
 
 def create_file_menu(self_):
@@ -8,13 +10,13 @@ def create_file_menu(self_):
     """
     file = self_.bar.addMenu("File") # lepiej zwrócić niż nie
 
-    self_.open = QAction("&Open", self_)
+    self_.open = QAction("&Open...", self_)
     self_.open.setShortcut("Ctrl+O")
     self_.open.setToolTip("Open existing file")
     self_.open.triggered.connect(self_.open_file)
     file.addAction(self_.open)
 
-    self_.save = QAction("&Save", self_)
+    self_.save = QAction("&Save...", self_)
     self_.save.setShortcut("Ctrl+S")
     self_.save.setToolTip("Save generated gallery")
     self_.save.triggered.connect(self_.save_gallery)
@@ -29,7 +31,7 @@ def create_gallery_menu(self_):
     """
     self_.gallery = self_.bar.addMenu("Gallery")
     
-    self_.new = QAction("&New", self_)
+    self_.new = QAction("&New...", self_)
     self_.new.setShortcut("Ctrl+N")
     self_.new.setStatusTip("Create new gallery")
     self_.new.triggered.connect(self_.new_gallery)
@@ -109,15 +111,25 @@ def create_effects_menu(self_):
     self_.effects.addAction(self_.points)
 
 
+def how_to_start():
+    message("To create new gallery select\n'Gallery' -> 'New...'\nenter topic and click Ok",
+                "How to start", "Ok")
+
+def open_docs():
+    os.system("Dokumentacja.pdf")
+
+
 def create_help_menu(self_):
     """
     Creating help menu bar
-    """
+    """ 
     self_.help = self_.bar.addMenu("Help")
     
-    self_.start = QAction("How to Start", self_)
+    self_.start = QAction("How to Start...", self_)
     self_.start.setStatusTip("Instruction how to start using program")
+    self_.start.triggered.connect(how_to_start)
     self_.help.addAction(self_.start)
 
-    self_.about = QAction("About program", self_)
+    self_.about = QAction("Documentation...", self_)
+    self_.about.triggered.connect(open_docs)
     self_.help.addAction(self_.about)

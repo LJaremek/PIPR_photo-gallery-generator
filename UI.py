@@ -5,7 +5,6 @@ from UIClasses.PyQt5Menus import (create_file_menu, create_gallery_menu,
 from UIClasses.PyQt5message import message
 from effects import *
 from errors import *
-"""-----------------------------"""
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QInputDialog, QFileDialog
@@ -114,15 +113,16 @@ class MainWindow(QMainWindow):
         Function makes new gallery
         """
         ex = InputDialog()
-        ex.exec()
-        self.scene.clear()
-        self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0)
-        result = ex.getInputs()
-        if result != None:
+        
+
+        if ex.exec():
+            result = ex.getInputs()
+            if result == None:
+                return None
             self.scene.clear()
             self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0)
             message("Please wait!\nYour gallery is generating!", "Stand by", "Ok")
-            
+
             self._gen = GalleryGenerator(result[2], result[3])
 
             self._gen.generate_gallery(topic = result[0], background = result[1])

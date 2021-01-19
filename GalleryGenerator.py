@@ -2,7 +2,6 @@ from SimpleCanvas import Canvas
 from effects import Colors
 from Photo import Photo
 from errors import *
-"""-----------------------------"""
 from urllib.request import urlopen
 from urllib.error import URLError
 from bs4 import BeautifulSoup
@@ -99,7 +98,7 @@ class GalleryGenerator:
         """
         Downloading  photo on the topic.
         """
-        response = urlopen(self._main_page+topic)
+        response = urlopen(self._main_page+topic.replace(' ', '-'))
         code = response.status
         image = np.asarray(bytearray(response.read()), dtype = "uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -244,7 +243,7 @@ class GalleryGenerator:
 if __name__ == "__main__":
     gen = GalleryGenerator(1000, 800)
 
-    gen.generate_gallery(topic = "team", background = "Black")
+    gen.generate_gallery(topic = "new york", background = "Black")
     # gen.cut_canvas()
     gallery = gen.canvas()
     print(type(gallery))

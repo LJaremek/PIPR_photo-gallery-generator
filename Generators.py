@@ -29,6 +29,9 @@ class TopicGenerator:
 
 
     def new_word(self, word):
+        """
+        Checking if the word is in the topics
+        """
         return word in self.topics
 
 
@@ -78,11 +81,11 @@ class TopicGenerator:
             print(f"[-] {random_topic} - {numbers_of_photos}")
 
 
-    def good_topics(self):
+    def good_topics(self, number_of_all_topics=100):
         """
         Searching for topics until there is one.
         """
-        while len(self.topics) != 1000:
+        while len(self.topics) <= number_of_all_topics:
             try:
                 self.find_new_topic()
             except:
@@ -92,4 +95,4 @@ class TopicGenerator:
 
 if __name__ == "__main__":
     gen = TopicGenerator(200)
-    gen.good_topics()
+    gen.good_topics(1000)
