@@ -56,7 +56,10 @@ def pastel(image):
 
 def old_cartoon(image):
     blurred = cv2.medianBlur(pastel(image), 3)
-    return cv2.bitwise_and(blurred, blurred, mask=sepia(image))
+    sep = sepia(image)
+    gray = cv2.cvtColor(sep, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY_INV)
+    return cv2.bitwise_and(blurred, blurred, mask = mask)
 
 
 def points(image):

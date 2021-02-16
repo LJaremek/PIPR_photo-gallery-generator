@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         self.sepia.setEnabled(bool_value)
         self.cartoon.setEnabled(bool_value)
         self.pastel.setEnabled(bool_value)
-        self.old_cartoon.setEnabled(False)
+        self.old_cartoon.setEnabled(bool_value)
         self.points.setEnabled(bool_value)
 
 
