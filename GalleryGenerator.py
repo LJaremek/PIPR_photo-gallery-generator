@@ -65,8 +65,7 @@ class GalleryGenerator:
         photo_1: NUMPY_ndarray
         photo_2: NUMPY_ndarray
         out:
-        True if there are are a difference
-        False if there are not a difference
+        BOOL if there are are a difference
         """
         difference = cv2.subtract(photo_1, photo_2)
         b, g, r = cv2.split(difference)
@@ -78,10 +77,10 @@ class GalleryGenerator:
     def _compare_photo(self, the_photo: np.ndarray):
         """
         Checking if the photo is not in the chosen photos.
-        If it is in the photos:
-            return True
-        If it is not in the photos:
-            return False
+        in:
+        photo
+        out:
+        BOOL If the photo is in the photos
         """
         for photo in self._photos:
             if photo.image().shape != the_photo.shape:
@@ -179,10 +178,10 @@ class GalleryGenerator:
     def check_topic(self, topic: str):
         """
         Checking if the topic is correctly.
-        If it is:
-            return True
-        else:
-            return False
+        in:
+        topic
+        out:
+        BOOL if the topict is correctly
         """
         url = f"https://unsplash.com/s/photos/{topic.replace(' ', '-')}"
         try:
@@ -246,7 +245,6 @@ if __name__ == "__main__":
     gen.generate_gallery(topic = "new york", background = "Black")
     # gen.cut_canvas()
     gallery = gen.canvas()
-    print(type(gallery))
     
     gen.show_canvas()
     
