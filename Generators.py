@@ -48,6 +48,9 @@ class TopicGenerator:
 
 
     def read_topics(self):
+        """
+        Read topics from the file to program.
+        """
         self.topics = []
         try:
             with open("topics_base.txt") as file:
