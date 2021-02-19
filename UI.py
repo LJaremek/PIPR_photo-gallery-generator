@@ -21,6 +21,8 @@ class MainWindow(QMainWindow):
         self._gen = GalleryGenerator()
         self.scene = QGraphicsScene(self)
         self.statusBar()
+        self.history = []
+        self.position = None
         
         self._config_bar()
         
@@ -31,7 +33,7 @@ class MainWindow(QMainWindow):
 
         self.new_gallery = cv2.imread("Images/new_gallery.png")
         self.wait_for_gallery = cv2.imread("Images/wait_for_gallery.png")
-        self.set_numpy_image_on_scene(self.new_gallery, 0, 0)
+        self.set_numpy_image_on_scene(self.new_gallery, 0, 0, 0)
 
 
     def _config_bar(self):
@@ -49,6 +51,8 @@ class MainWindow(QMainWindow):
         main_options.addAction(self.open)
         main_options.addAction(self.save)
         main_options.addAction(self.new)
+        main_options.addAction(self.back)
+        main_options.addAction(self.undo)
 
         effects_options = self.addToolBar("Effects")
         effects_options.addAction(self.blur)
@@ -104,8 +108,15 @@ class MainWindow(QMainWindow):
         """
         selected_effect = effects_dict[effect]
         new_canvas = selected_effect( self._gen.canvas() )
-        self.set_new_canvas(new_canvas)
+        self.set_numpy_image_on_scene(new_canvas, 0, 0, 1)
         
+
+    def back_gallery(self):
+        self.set_numpy_image_on_scene(None, 0, 0, -1)
+
+
+    def undo_gallery(self):
+        self.set_numpy_image_on_scene(None, 0, 0, 3)
 
 
     def new_gallery(self):
@@ -114,14 +125,18 @@ class MainWindow(QMainWindow):
         """
         ex = InputDialog()
         
-
         if ex.exec():
             result = ex.getInputs()
             if result == None:
                 return None
             self.scene.clear()
-            self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0)
+            self.set_numpy_image_on_scene(self.wait_for_gallery, 0, 0, 0)
             message("Please wait!\nYour gallery is generating!", "Stand by", "Ok")
+            if self.position is None:
+                operation = 2
+            else:
+                operation = 1
+            
 
             self._gen = GalleryGenerator(result[2], result[3])
 
@@ -129,7 +144,7 @@ class MainWindow(QMainWindow):
             
             canvas = self._gen.canvas()
             canvas = cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR, canvas)
-            self.set_numpy_image_on_scene(canvas, 0, 0)
+            self.set_numpy_image_on_scene(canvas, 0, 0, operation)
             
             self.set_edit_options(True)
             self.set_effects(True)
@@ -152,7 +167,7 @@ class MainWindow(QMainWindow):
         Setting up the new canvas
         """
         self.scene.clear()
-        self.set_numpy_image_on_scene(new_canvas, 0, 0)
+        self.set_numpy_image_on_scene(new_canvas, 0, 0, 2)
 
 
     def clear_gallery(self):
@@ -160,7 +175,7 @@ class MainWindow(QMainWindow):
         Clearing canvas
         """
         self.scene.clear()
-        self.set_numpy_image_on_scene(self.new_gallery, 0, 0)
+        self.set_numpy_image_on_scene(self.new_gallery, 0, 0, 0)
         self.set_edit_options(False)
         self.set_effects(False)
 
@@ -210,13 +225,51 @@ class MainWindow(QMainWindow):
         format_ = QImage.Format_RGB888
         
         background = QPixmap(QImage(background.image(), width, height, bytesPerLine, format_))
-        self.set_qpixmap_on_scene(background, 0, 0)        
+        self.set_qpixmap_on_scene(background, 0, 0)
+
+
+    def update_history(self, numpy_image, operation):
+        if operation == 0: # setting new canvas
+            return numpy_image
+        
+        elif operation == -1: # back canvas
+            if self.position == 1:
+                self.back.setEnabled(False)
+            self.position -= 1
+            self.undo.setEnabled(True)
+            return self.history[self.position]
+        
+        elif operation == 1: # add new canvas
+            self.position += 1
+            if self.position == 1:
+                self.back.setEnabled(True)
+            if self.position != len(self.history):
+                del self.history[self.position:]
+                self.undo.setEnabled(False)
+            self.history.append(numpy_image)
+            return numpy_image
+        
+        elif operation == 2: # setting first canvas
+            self.position = 0
+            self.history.append(numpy_image)
+            return numpy_image
+        
+        elif operation == 3: # undo canvas
+            if self.position == 0:
+                self.back.setEnabled(True)
+            self.position += 1
+            image = self.history[self.position]
+            if self.position+1 == len(self.history):
+                self.undo.setEnabled(False)
+            return image
         
 
-    def set_numpy_image_on_scene(self, numpy_image, x, y):
+    def set_numpy_image_on_scene(self, numpy_image, x, y, history=1):
         """
         Setting numpy image on canvas
         """
+        numpy_image = self.update_history(numpy_image, history)
+        self.scene.clear()
         self._gen.set_canvas(numpy_image)
         q_image = QImage(numpy_image.data, numpy_image.shape[1], numpy_image.shape[0],
                          numpy_image.shape[1]*numpy_image.shape[2], QImage.Format_RGB888)

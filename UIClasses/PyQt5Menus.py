@@ -30,6 +30,20 @@ def create_gallery_menu(self_):
     Creating gallery menu bar
     """
     self_.gallery = self_.bar.addMenu("Gallery")
+
+    self_.back = QAction("Back", self_)
+    self_.back.setShortcut("Ctrl+Z")
+    self_.back.setStatusTip("Back your canvas")
+    self_.back.triggered.connect(self_.back_gallery)
+    self_.back.setEnabled(False)    
+    self_.gallery.addAction(self_.back)
+
+    self_.undo = QAction("Undo", self_)
+    self_.undo.setShortcut("Ctrl+Shift+Z")
+    self_.undo.setStatusTip("Undo your canvas")
+    self_.undo.triggered.connect(self_.undo_gallery)
+    self_.undo.setEnabled(False)
+    self_.gallery.addAction(self_.undo)
     
     self_.new = QAction("&New...", self_)
     self_.new.setShortcut("Ctrl+N")
