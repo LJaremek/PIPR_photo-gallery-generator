@@ -10,8 +10,8 @@ load and save photos and apply effects to them
 
 
 ## New gallery window (Ctrl+N)
-Enter topic of gallery (or choose 'random' topic),
-width and height of canvas
+Enter topic of gallery (or choose 'random' topic),__
+width and height of canvas__
 and optionally enter background topic.
 
 ![new_gallery](https://user-images.githubusercontent.com/67274837/108506167-aacc5980-72b8-11eb-866b-ad54d5f90703.png)
@@ -24,14 +24,15 @@ Choose one of the available effects.
 
 
 ## Restore the gallery
-If you do not like the changes you made, use 'Back' option (Ctrl+Z).
+If you do not like the changes you made,__
+use 'Back' option (Ctrl+Z).
 
 ![back](https://user-images.githubusercontent.com/67274837/108507244-4f9b6680-72ba-11eb-8ac3-f93084181d22.png)
 
 ## Keyboard shortcuts available
-Ctrl+N - new gallery
-Ctrl+O - open file
-Ctrl+S - save gallery
-Ctrl+C - trim gallery
-Ctrl+Z - Back option
+Ctrl+N - new gallery__
+Ctrl+O - open file__
+Ctrl+S - save gallery__
+Ctrl+C - trim gallery__
+Ctrl+Z - Back option__
 Ctrl+Shift+Z - Undo option
